@@ -1,32 +1,83 @@
-# AI Support Ticket Router
+# 🎫 AI Support Ticket Router
 
-## Overview
-This is a simple AI-based application that predicts the category of a support ticket based on its text.
-It helps simulate how support tickets can be automatically routed to the correct team.
+## 🚀 Overview
+An AI-powered web application that automatically classifies support tickets into relevant categories using a fine-tuned BERT model.
 
-## Problem
-In support teams, tickets are often manually read and assigned to different teams.
-This takes time and can delay issue resolution.
+This project simulates how real-world support systems can intelligently route tickets to the correct teams, reducing manual effort and improving response time.
 
-## What This Project Does
-- Takes support ticket text as input
-- Predicts the type of issue (for example: database, application, billing, etc.)
-- Displays the predicted category
+---
 
-## How It Works
-- A trained text classification model analyzes the ticket content
-- The model predicts the most likely ticket category
-- The result is shown using a simple web interface
+## ❗ Problem Statement
+In most organizations, support tickets are manually reviewed and assigned to different teams (Auth, Billing, Database, etc.).
 
-## Tech Used
-- Python
-- Streamlit
-- Pre-trained text classification model
+This leads to:
+- ⏳ Delays in issue resolution  
+- ❌ Human errors in routing  
+- 📉 Inefficient support workflows  
 
-## Use Case
-- Demo of automated ticket categorization
-- Learning project for applying NLP to real-world support workflows
+---
 
-## Status
-Working prototype for demonstration and learning purposes.
+## 💡 Solution
+This project automates ticket classification using Natural Language Processing (NLP).
 
+👉 Input: Raw support ticket text  
+👉 Output: Predicted category with confidence score  
+
+---
+
+## ⚙️ Features
+
+- 🎯 Accurate ticket classification (Auth, App, Billing, DB, Infra)
+- 📊 Confidence score for predictions
+- 📈 Probability distribution across all categories
+- 🎨 Clean and interactive UI using Streamlit
+- ⚡ Example-based quick testing
+
+---
+
+## 🧠 How It Works
+
+1. Ticket text is input through the UI  
+2. Text is tokenized using a BERT tokenizer  
+3. A fine-tuned BERT model predicts the category  
+4. Output includes:
+   - Predicted label  
+   - Confidence score  
+   - All category probabilities  
+
+---
+
+## 🛠️ Tech Stack
+
+- Python  
+- Streamlit  
+- HuggingFace Transformers (BERT)  
+- PyTorch  
+- Pandas  
+
+---
+
+## 📸 Demo
+
+### 🔹 Application Screenshot
+![App Screenshot]()
+
+### 🎥 Demo Video
+[Watch Demo](your-video-link-here)
+
+---
+
+## ▶️ How to Run Locally
+
+```bash
+# Clone repo
+git clone <your-repo-link>
+
+# Navigate
+cd support-ticket-router
+
+# Activate virtual environment
+venv\Scripts\activate
+
+# Run app
+streamlit run app.py
