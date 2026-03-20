@@ -1,47 +1,58 @@
 import os
 os.environ['TRANSFORMERS_CACHE'] = r"D:\cache"
 
-
 import pandas as pd
 import torch
 from transformers import BertTokenizer, BertForSequenceClassification
+from torch.utils.data import Dataset, DataLoader
+from torch.optim import AdamW
 
-# Load support tickets
-df = pd.read_csv("data/tickets.csv", sep="\t")
-# Encode labels to numbers
-label_mapping = {label: idx for idx, label in enumerate(df['label'].unique())}
-df['label_num'] = df['label'].map(label_mapping)
+# -----------------------------
+# Load dataset
+# -----------------------------
+df = pd.read_csv("data/tickets.csv")
 
-# Quick check
-print(df.head())
-print(label_mapping)
+df.columns = df.columns.str.strip()
+df = df.dropna()
 
+# Ensure ticket text is string
+df['ticket_text'] = df['ticket_text'].astype(str)
 
-# Quick sanity check
 print(df.head())
 print(df.shape)
 
-from transformers import BertTokenizer
+# -----------------------------
+# ✅ LABEL MAPPING (FIXED ORDER)
+# -----------------------------
+labels = ['auth', 'app', 'billing', 'db', 'infra']
+label_mapping = {label: idx for idx, label in enumerate(labels)}
 
-# Load BERT tokenizer
+df['label_num'] = df['label'].map(label_mapping)
+
+# Check for mapping errors
+if df['label_num'].isnull().sum() > 0:
+    print("❌ ERROR: Some labels not mapped correctly")
+    print(df[df['label_num'].isnull()])
+    exit()
+
+print("Label mapping:", label_mapping)
+
+# -----------------------------
+# Load tokenizer
+# -----------------------------
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
-# Tokenize all ticket texts
 encoded_inputs = tokenizer(
-    list(df['ticket_text']),     # your text column
-    padding=True,                # pad shorter sentences
-    truncation=True,             # truncate longer sentences
-    max_length=64,               # max tokens per sentence
-    return_tensors='pt'          # return PyTorch tensors
+    df['ticket_text'].tolist(),
+    padding=True,
+    truncation=True,
+    max_length=64,
+    return_tensors='pt'
 )
 
-# Inspect one example
-print(encoded_inputs['input_ids'][0])
-print(encoded_inputs['attention_mask'][0])
-
-from torch.utils.data import Dataset, DataLoader
-
-# Create custom dataset
+# -----------------------------
+# Dataset class
+# -----------------------------
 class TicketDataset(Dataset):
     def __init__(self, encodings, labels):
         self.encodings = encodings
@@ -51,69 +62,66 @@ class TicketDataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+        item = {key: val[idx] for key, val in self.encodings.items()}
         item['labels'] = torch.tensor(self.labels[idx])
         return item
 
-# Create dataset
 dataset = TicketDataset(encoded_inputs, df['label_num'].tolist())
 
-# Create DataLoader
+# -----------------------------
+# DataLoader
+# -----------------------------
 dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
 
-# Inspect one batch
-for batch in dataloader:
-    print(batch)
-    break
-from transformers import BertForSequenceClassification
-from torch.optim import AdamW
+# -----------------------------
+# Load BERT model
+# -----------------------------
+num_labels = len(labels)
 
-
-# Number of classes (from your labels)
-num_labels = len(label_mapping)
-
-# Load pre-trained BERT with a classification head
 model = BertForSequenceClassification.from_pretrained(
     'bert-base-uncased',
     num_labels=num_labels
 )
 
-# Move model to GPU if available
+# 🔥 Reset classifier (fix bias issue)
+model.classifier.reset_parameters()
+
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 model.to(device)
 
 optimizer = AdamW(model.parameters(), lr=5e-5)
 
-from torch.nn import CrossEntropyLoss
+# -----------------------------
+# Training loop
+# -----------------------------
+model.train()
 
-model.train()  # Set model to training mode
+for epoch in range(8):  # 🔥 increased training
+    print(f"\nEpoch {epoch+1}")
 
-for batch in dataloader:
-    # Move batch to device
-    input_ids = batch['input_ids'].to(device)
-    attention_mask = batch['attention_mask'].to(device)
-    labels = batch['labels'].to(device)
-    
-    # Forward pass
-    outputs = model(
-        input_ids=input_ids,
-        attention_mask=attention_mask,
-        labels=labels
-    )
-    
-    loss = outputs.loss
-    logits = outputs.logits
-    
-    print(f"Batch loss: {loss.item()}")
-    
-    # Backward pass
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
-    
-    model.save_pretrained(r"D:\support_ticket_router\trained_model")
-    tokenizer.save_pretrained(r"D:\support_ticket_router\trained_model")
+    for batch in dataloader:
+        input_ids = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
+        labels_batch = batch['labels'].to(device)
 
-    print("Model and tokenizer saved successfully!")
+        outputs = model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            labels=labels_batch
+        )
 
+        loss = outputs.loss
 
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    print(f"Epoch {epoch+1} completed, last loss: {loss.item()}")
+
+# -----------------------------
+# Save model
+# -----------------------------
+model.save_pretrained(r"D:\support_ticket_router\trained_model")
+tokenizer.save_pretrained(r"D:\support_ticket_router\trained_model")
+
+print("✅ Training complete. Model saved successfully!")

@@ -1,0 +1,39 @@
+ticket_text,label 
+Account locked due to failed login attempts ,auth
+User locked out after too many login attempts ,auth
+Login attempts exceeded account locked ,auth
+Account temporarily locked for security reasons ,auth
+Too many login attempts account blocked ,auth
+User unable to authenticate with OTP,auth
+OTP code expired,auth
+Multi factor authentication not working,auth
+Unable to verify identity during login,auth
+Refund not processed after cancellation,billing
+Subscription renewed without confirmation,billing
+Incorrect billing amount shown on invoice,billing
+Payment gateway showing failure but amount deducted,billing
+Customer charged twice for subscription,billing
+Database not accessible,db
+Connection refused to database,db
+Database service down,db
+Database connection timeout error,db
+Slow query affecting application performance,db
+Index corruption causing query failure,db
+Table lock preventing inserts,db
+Query execution taking too long,db
+Button click not working app,app
+Page not loading properly app,app
+App freezing randomly app,app
+Application crashes after login,app
+Dropdown menu not responding,app
+Form submission fails intermittently,app
+Mobile app screen stuck on loading,app
+Error message appears when uploading file,app
+High CPU usage on server ,infra
+Server not reachable,infra
+Network connection unstable ,infra
+Load balancer health check failing,infra
+Disk usage reached critical level,infra
+Server rebooting automatically,infra
+Container service not responding,infra
+Memory usage extremely high on server,infra

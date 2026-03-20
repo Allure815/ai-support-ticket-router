@@ -1,30 +1,37 @@
 from transformers import BertTokenizer, BertForSequenceClassification
 import torch
+import torch.nn.functional as F
 
-# Load trained model and tokenizer
-model = BertForSequenceClassification.from_pretrained(r"D:\support_ticket_router\trained_model")
-tokenizer = BertTokenizer.from_pretrained(r"D:\support_ticket_router\trained_model")
+MODEL_PATH = r"D:\support_ticket_router\trained_model"
+
+model = BertForSequenceClassification.from_pretrained(MODEL_PATH)
+tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 model.to(device)
 model.eval()
 
-# Test a new ticket
-text = "Unable to access database"
-inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=64).to(device)
-outputs = model(**inputs)
-predicted_label = torch.argmax(outputs.logits, dim=1).item()
-print("Predicted label number:", predicted_label)
+# keep simple mapping
+labels = ['auth', 'app', 'billing', 'db', 'infra']
 
-# Map number back to text label
+def predict_ticket(text):
+    inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=64).to(device)
 
-# Correct label mapping based on your training data
-label_mapping = {'auth': 0, 'app': 1, 'billing': 2, 'db': 3, 'infra': 4}
-rev_mapping = {v: k for k, v in label_mapping.items()}
+    with torch.no_grad():
+        outputs = model(**inputs)
 
-print("Predicted label number:", predicted_label)
-print("Predicted label:", rev_mapping[predicted_label])
+    probs = F.softmax(outputs.logits, dim=1)
+    predicted_index = torch.argmax(probs, dim=1).item()
+    confidence = probs[0][predicted_index].item()
+
+    return labels[predicted_index], confidence
 
 
-print("Logits:", outputs.logits)
-print("Predicted index:", predicted_label)
+# test
+if __name__ == "__main__":
+    text = "Unable to access database"
+    label, confidence = predict_ticket(text)
+
+    print("Input:", text)
+    print("Prediction:", label)
+    print("Confidence:", round(confidence, 2))
