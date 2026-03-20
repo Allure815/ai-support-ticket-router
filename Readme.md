@@ -60,10 +60,10 @@ This project automates ticket classification using Natural Language Processing (
 ## 📸 Demo
 
 ### 🔹 Application Screenshot
-![App Screenshot]()
+![App Screenshot](https://github.com/Allure815/ai-support-ticket-router/blob/main/ss.png)
 
 ### 🎥 Demo Video
-[Watch Demo](your-video-link-here)
+[Watch Demo](https://github.com/Allure815/ai-support-ticket-router/blob/main/Demo-Support%20ticket%20router.mp4)
 
 ---
 
