@@ -34,12 +34,17 @@ Manual ticket triage is slow and error-prone — someone has to read every ticke
 
 Input: raw ticket text → Output: predicted category + confidence score + full probability breakdown across all classes.
 
+
 ## ⚙️ Features
 
 - 🎯 5-class ticket classification (auth, app, billing, db, infra) using a fine-tuned bert-base-uncased model
+
 -📊 Confidence score with a low-confidence warning flag, so ambiguous tickets can be escalated for human review instead of   silently misrouted
+
 -📈 Full probability distribution across all categories, not just the top prediction
+
 -🎨 Interactive Streamlit UI with one-click example tickets for fast demos
+
 -⚡ Lightweight inference — runs on CPU, no GPU required
 
 ---
@@ -94,6 +99,7 @@ streamlit run app.py
 
 
 Note: update MODEL_PATH in app.py / predict_ticket.py to point to your local trained_model/ directory (currently hardcoded to a Windows path).
+
 
 
 🔭 What's Next
