@@ -52,9 +52,13 @@ Input: raw ticket text → Output: predicted category + confidence score + full 
 ## 🧠 How It Works
 
 1.User enters raw ticket text in the UI
+
 2.Text is tokenized with a BertTokenizer (max length 64, truncation + padding)
+
 3.The fine-tuned BertForSequenceClassification model runs a forward pass
+
 4.Logits are converted to probabilities via softmax
+
 5.UI displays the predicted label, confidence %, and per-class probability breakdown
 
 
